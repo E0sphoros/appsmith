@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import type { Column } from "react-table";
 import { useTable } from "react-table";
@@ -76,34 +76,91 @@ const numberToExcelHeader = (index: number): string => {
   return chars[index % 26];
 };
 
+interface DocumentViewerState {
+  jsonData: any[];
+  sheetNames: string[];
+  currentTableData: any[];
+  currentTableHeaders: Column[];
+  tableData: Record<number, any[]>;
+  headerData: Record<number, Column[]>;
+}
+
 export default function XlsxViewer(props: { blob?: Blob }) {
-  const [sheetNames, setSheetNames] = useState([] as string[]);
-  const [tableData, setTableData] = useState([]);
-  const [headerData, setHeaderData] = useState([] as Column[]);
-  const [jsonData, setJSONData] = useState([] as any[]);
+  const defaultTableData: Record<number, []> = { "-1": [] };
+  const [sheetIndex, setSheetIndex] = useState<number>(-1);
+  const [state, setState] = useState<DocumentViewerState>({
+    jsonData: [],
+    sheetNames: [],
+    currentTableData: [],
+    currentTableHeaders: [],
+    tableData: Object.assign({}, defaultTableData),
+    headerData: Object.assign({}, defaultTableData),
+  });
 
   useEffect(() => {
-    props.blob?.arrayBuffer().then((buffer) => {
-      const workbook = XLSX.read(buffer, { type: "array" });
+    if (!props.blob) {
+      // Todo : figure out whot to do
+      resetStates();
+      setState(Object.assign({}, state)); // state gets reset above
+    } else {
+      parseBlob(props.blob)
+        .then((jsonData: { sheetsData: any; sheetNames: string[] }) => {
+          state.jsonData = jsonData.sheetsData;
+          state.sheetNames = jsonData.sheetNames;
+          const localSheetIndex = jsonData.sheetsData.length > 0 ? 0 : -1;
 
-      const names: string[] = [];
-      const data: any[] = [];
+          state.jsonData.forEach((data, index) => {
+            state.tableData[index] = parseTableBody(data);
+            state.headerData[index] = parseTableHeaders(data);
+          });
 
-      workbook.SheetNames.forEach((name, index) => {
-        names.push(name);
-
-        const result = XLSX.utils.sheet_to_json(
-          workbook.Sheets[workbook.SheetNames[index]],
-          { header: 1 },
-        );
-        data.push(result);
-      });
-
-      setSheetNames(names);
-      setJSONData(data);
-      getSheetData(0);
-    });
+          if (jsonData.sheetsData.length > 0) {
+            state.currentTableData = state.tableData[localSheetIndex];
+            state.currentTableHeaders = state.headerData[localSheetIndex];
+          }
+          setState(Object.assign({}, state));
+          setSheetIndex(localSheetIndex);
+        })
+        .catch(() => {
+          resetStates();
+          setState(Object.assign({}, state));
+        });
+    }
   }, [props.blob]);
+
+  async function parseBlob(blob: Blob) {
+    const buffer = await blob.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: "array" });
+    const jsonData = convertWorkbookDataToJSON(workbook);
+    return jsonData;
+  }
+
+  const convertWorkbookDataToJSON = (workbook: XLSX.WorkBook) => {
+    const sheetsData: any[] = [];
+    const sheetNames: string[] = [];
+
+    workbook.SheetNames.forEach((name, index) => {
+      sheetNames.push(name);
+
+      const result = XLSX.utils.sheet_to_json(
+        workbook.Sheets[workbook.SheetNames[index]],
+        { header: 1 },
+      );
+      sheetsData.push(result);
+    });
+
+    return { sheetsData, sheetNames };
+  };
+
+  const resetStates = () => {
+    state.jsonData = [];
+    state.currentTableData = [];
+    state.currentTableHeaders = [];
+    state.sheetNames = [];
+    state.tableData = Object.assign({}, defaultTableData);
+    state.headerData = Object.assign({}, defaultTableData);
+    setSheetIndex(-1);
+  };
 
   function parseTableBody(excelData: any[]) {
     const data = [] as any;
@@ -142,32 +199,25 @@ export default function XlsxViewer(props: { blob?: Blob }) {
     return newHeader;
   };
 
-  // get provided sheet data, read all row and columns
-  const getSheetData = useCallback((sheetIndex: number) => {
-    // collect all row data
-    const body = parseTableBody(jsonData[sheetIndex]);
-    const headers = parseTableHeaders(jsonData[sheetIndex]);
-
-    setTableData(body);
-    setHeaderData(headers);
-  }, []);
-
-  // // when user click on another sheet, re-generate data
-  const updateSheet = useCallback(
-    (sheetIndex) => () => {
-      getSheetData(sheetIndex);
-    },
-    [],
-  );
-
   const { getTableBodyProps, getTableProps, headerGroups, prepareRow, rows } =
-    useTable({ columns: headerData, data: tableData });
+    useTable({
+      columns: state.headerData[sheetIndex],
+      data: state.tableData[sheetIndex],
+    });
 
   return (
     <StyledViewer>
       <div>
-        {sheetNames.map((name, index) => (
-          <button key={index} onClick={updateSheet(index)}>
+        {state.sheetNames.map((name, index) => (
+          <button
+            key={index}
+            onClick={() => {
+              // state.sheetIndex = index
+              console.log("***", "clicking on index ", index);
+              setSheetIndex(index);
+              // setState(Object.assign({}, state))
+            }}
+          >
             {name}
           </button>
         ))}
