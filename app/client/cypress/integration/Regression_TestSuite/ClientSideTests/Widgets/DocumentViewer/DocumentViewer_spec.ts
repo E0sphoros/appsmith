@@ -98,7 +98,7 @@ describe("DocumentViewer Widget Functionality", () => {
     deployMode.NavigateBacktoEditor();
   });
 
-  it.only("8. Should show a xls document correctly", () => {
+  it("8. Should show a xls document correctly", () => {
     ee.SelectEntityByName("DocumentViewer1", "Widgets");
     propPane.UpdatePropertyFieldValue("Document Link", encodedXlsDoc);
     deployMode.DeployApp();

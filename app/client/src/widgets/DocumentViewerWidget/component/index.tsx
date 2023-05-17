@@ -60,7 +60,6 @@ const getBlob = (docUrl: string) => {
     const blob = new Blob([uInt8Array], { type: mimeType });
     return blob;
   } catch (error) {
-    console.log("***", "error parsing blob", error);
     return;
   }
 };

@@ -80,24 +80,27 @@ export default function XlsxViewer(props: { blob?: Blob }) {
   const [sheetNames, setSheetNames] = useState([] as string[]);
   const [tableData, setTableData] = useState([]);
   const [headerData, setHeaderData] = useState([] as Column[]);
-  const jsonData: any[] = [];
+  const [jsonData, setJSONData] = useState([] as any[]);
 
   useEffect(() => {
     props.blob?.arrayBuffer().then((buffer) => {
       const workbook = XLSX.read(buffer, { type: "array" });
 
-      const sheetNames: string[] = [];
-      workbook.SheetNames.map((name, index) => {
-        sheetNames.push(name);
+      const names: string[] = [];
+      const data: any[] = [];
+
+      workbook.SheetNames.forEach((name, index) => {
+        names.push(name);
 
         const result = XLSX.utils.sheet_to_json(
           workbook.Sheets[workbook.SheetNames[index]],
           { header: 1 },
         );
-        jsonData.push(result);
+        data.push(result);
       });
 
-      setSheetNames(sheetNames);
+      setSheetNames(names);
+      setJSONData(data);
       getSheetData(0);
     });
   }, [props.blob]);
