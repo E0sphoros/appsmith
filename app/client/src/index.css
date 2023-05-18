@@ -238,3 +238,9 @@ div.bp3-popover-arrow {
   background-color: transparent !important;
   cursor: default !important;
 }
+.picker-dialog-bg {
+  z-index: 20000 !important;
+}
+.picker-dialog {
+  z-index: 20001 !important;
+}
