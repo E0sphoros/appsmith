@@ -216,12 +216,9 @@ const DBFormWrapper = styled.div`
   }
 `;
 
-const StyledModal = styled(Modal)`
-  z-index: ${Indices.Layer9};
-`;
-
 const ModalContentWrapper = styled(ModalContent)`
   width: 100%;
+  z-index: ${Indices.Layer9};
 `;
 const ModalBodyWrapper = styled(ModalBody)`
   overflow-y: hidden;
@@ -509,8 +506,11 @@ function ReconnectDatasourceModal() {
     isConfigFetched && !isLoading && !datasource?.isConfigured;
 
   return (
-    <StyledModal onOpenChange={handleClose} open={isModalOpen}>
-      <ModalContentWrapper data-testid="reconnect-datasource-modal">
+    <Modal onOpenChange={handleClose} open={isModalOpen}>
+      <ModalContentWrapper
+        data-testid="reconnect-datasource-modal"
+        overlayClassName="reconnect-datasource-modal"
+      >
         <ModalHeader>Reconnect datasources</ModalHeader>
         <ModalBodyWrapper>
           <BodyContainer>
@@ -568,7 +568,7 @@ function ReconnectDatasourceModal() {
           </BodyContainer>
         </ModalBodyWrapper>
       </ModalContentWrapper>
-    </StyledModal>
+    </Modal>
   );
 }
 
