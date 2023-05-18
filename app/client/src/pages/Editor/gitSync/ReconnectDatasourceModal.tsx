@@ -64,6 +64,7 @@ import {
   Button,
   Text,
 } from "design-system";
+import { Indices } from "constants/Layers";
 
 const Section = styled.div`
   display: flex;
@@ -213,6 +214,10 @@ const DBFormWrapper = styled.div`
   .t--delete-datasource {
     display: none;
   }
+`;
+
+const StyledModal = styled(Modal)`
+  z-index: ${Indices.Layer9};
 `;
 
 const ModalContentWrapper = styled(ModalContent)`
@@ -504,7 +509,7 @@ function ReconnectDatasourceModal() {
     isConfigFetched && !isLoading && !datasource?.isConfigured;
 
   return (
-    <Modal onOpenChange={handleClose} open={isModalOpen}>
+    <StyledModal onOpenChange={handleClose} open={isModalOpen}>
       <ModalContentWrapper data-testid="reconnect-datasource-modal">
         <ModalHeader>Reconnect datasources</ModalHeader>
         <ModalBodyWrapper>
@@ -563,7 +568,7 @@ function ReconnectDatasourceModal() {
           </BodyContainer>
         </ModalBodyWrapper>
       </ModalContentWrapper>
-    </Modal>
+    </StyledModal>
   );
 }
 
