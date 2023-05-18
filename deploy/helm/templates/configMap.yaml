@@ -3,6 +3,8 @@
 {{- $mongoUser := .Values.mongodb.auth.rootUser -}}
 {{- $mongoPassword := .Values.mongodb.auth.rootPassword -}}
 {{- $mongoServicename := .Values.mongodb.service.nameOverride -}}
+{{- $encryptionSalt := randAlphaNum 14 -}}
+{{- $encryptionPassword := randAlphaNum 14 -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -16,6 +18,12 @@ data:
   {{- if $.Values.mongodb.enabled }}
   {{ $key }}: mongodb+srv://{{ $mongoUser }}:{{ $mongoPassword }}@{{ $mongoServicename }}.{{ $nameSpace }}.svc.cluster.local/appsmith?retryWrites=true&authSource=admin&ssl=false
   {{- end }}
+  {{- end }}
+  {{- if and (eq "APPSMITH_ENCRYPTION_PASSWORD" $key) ( not $value) }}
+  {{ $key }}: {{ $encryptionSalt | quote }}
+  {{- end }}
+  {{- if and (eq "APPSMITH_ENCRYPTION_SALT" $key) ( not $value) }}
+  {{ $key }}: {{ $encryptionPassword | quote }}
   {{- end }}
   {{- if and (eq "APPSMITH_REDIS_URL" $key) ( not $value) }}
   {{- if $.Values.redis.enabled }}
