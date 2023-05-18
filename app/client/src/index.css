@@ -244,3 +244,6 @@ div.bp3-popover-arrow {
 .picker-dialog {
   z-index: 20001 !important;
 }
+.react-datepicker__children-container {
+  margin-top: -10px !important;
+}
