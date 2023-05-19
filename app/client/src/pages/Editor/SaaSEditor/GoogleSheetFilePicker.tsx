@@ -46,11 +46,14 @@ function GoogleSheetFilePicker({
     // Since we need to display file picker on blank page, as soon as file picker is visible
     // Add overlay on the file picker background
     if (pickerVisible) {
-      const element: HTMLElement | null =
-        document.querySelector(".picker-dialog-bg");
-      if (!!element) {
-        element.style.opacity = "1";
+      const elements: NodeListOf<HTMLInputElement> | null =
+        document.querySelectorAll(".picker-dialog-bg");
+      if (!!elements && elements.length) {
+        elements[0].style.opacity = "1";
       }
+      elements.forEach((element) => {
+        element.style.pointerEvents = "auto";
+      });
     }
   }, [pickerVisible]);
 
