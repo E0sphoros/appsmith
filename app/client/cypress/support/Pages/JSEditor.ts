@@ -39,9 +39,9 @@ export class JSEditor {
     functionName: string,
     onLoad: boolean,
   ) =>
-    `.${functionName}-on-page-load-setting label:contains(${
+    `//div[contains(@class, '${functionName}-on-page-load-setting')]//label[text()='${
       onLoad ? "Yes" : "No"
-    })>input`;
+    }']/parent::div`;
   private _confirmBeforeExecuteRadioButton = (
     functionName: string,
     shouldConfirm: boolean,
@@ -53,9 +53,9 @@ export class JSEditor {
     functionName: string,
     shouldConfirm: boolean,
   ) =>
-    `.${functionName}-confirm-before-execute label:contains(${
+    `//div[contains(@class, '${functionName}-confirm-before-execute')]//label[text()='${
       shouldConfirm ? "Yes" : "No"
-    })>input`;
+    }']/parent::div`;
   private _outputConsole = ".CodeEditorTarget";
   private _jsObjName = ".t--js-action-name-edit-field span";
   private _jsObjTxt = ".t--js-action-name-edit-field input";
@@ -96,6 +96,10 @@ export class JSEditor {
       selector ? `${selector} ` : ""
     }.CodeMirror-line:nth-child(${lineNumber})`;
   _logsTab = "[data-testid=t--tab-LOGS_TAB]";
+  _confirmationModalBtns = (text: string) =>
+    "//div[@data-testid='t--query-run-confirmation-modal']//span[text()='" +
+    text +
+    "']/ancestor::button[@type='button']";
   //#endregion
 
   //#region constants
@@ -214,6 +218,7 @@ export class JSEditor {
   public RunJSObj() {
     this.agHelper.GetNClick(this._runButton);
     this.agHelper.Sleep(); //for function to run
+    this.agHelper.AssertElementAbsence(this.locator._runBtnSpinner, 10000);
     this.agHelper.AssertElementAbsence(this.locator._empty, 5000);
   }
 
@@ -311,13 +316,13 @@ export class JSEditor {
     // this.agHelper.AssertExistingToggleState(this._functionSetting(Cypress.env("MESSAGES").JS_SETTINGS_CONFIRM_EXECUTION()), bfrCalling)
 
     this.agHelper.GetNClick(this._settingsTab);
-    this.agHelper.AssertExistingToggleState(
+    this.agHelper.AssertExistingCheckedState(
       this._onPageLoadRadioButtonStatus(funName, onLoad),
-      "checked",
+      onLoad.toString(),
     );
-    this.agHelper.AssertExistingToggleState(
+    this.agHelper.AssertExistingCheckedState(
       this._confirmBeforeExecuteRadioButtonStatus(funName, bfrCalling),
-      "checked",
+      bfrCalling.toString(),
     );
   }
 

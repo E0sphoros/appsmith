@@ -42,10 +42,7 @@ describe("Validate CRUD queries for Amazon S3 along with UI flow verifications",
 
   it("1. Validate List Files in bucket (all existing files) command, run and then delete the query", () => {
     cy.NavigateToActiveDSQueryPane(datasourceName);
-    cy.ValidateAndSelectDropdownOption(
-      formControls.commandDropdown,
-      "List files in bucket",
-    );
+    _.dataSources.ValidateNSelectDropdown("Commands", "List files in bucket");
     _.dataSources.RunQuery({ toValidateResponse: false });
     cy.wait("@postExecute").should(({ response }) => {
       expect(response.body.data.isExecutionSuccess).to.eq(false);
@@ -75,8 +72,8 @@ describe("Validate CRUD queries for Amazon S3 along with UI flow verifications",
     //Create File
     cy.NavigateToActiveDSQueryPane(datasourceName);
     cy.setQueryTimeout(30000);
-    cy.ValidateAndSelectDropdownOption(
-      formControls.commandDropdown,
+    _.dataSources.ValidateNSelectDropdown(
+      "Commands",
       "List files in bucket",
       "Create a new file",
     );
@@ -128,11 +125,7 @@ describe("Validate CRUD queries for Amazon S3 along with UI flow verifications",
         response.body.data.pluginErrorDetails.appsmithErrorMessage,
       ).to.contains("File content is not base64 encoded.");
     });
-    cy.ValidateAndSelectDropdownOption(
-      formControls.s3CreateFileDataType,
-      "Base64",
-      "Text",
-    );
+    _.dataSources.ValidateNSelectDropdown("File data type", "Base64", "Text");
 
     cy.onlyQueryRun();
     cy.wait("@postExecute").then(({ response }) => {
@@ -155,8 +148,8 @@ describe("Validate CRUD queries for Amazon S3 along with UI flow verifications",
   });
 
   it("3. Validate List Files in bucket command for new file, Verify possible error msgs, run & delete the query", () => {
-    cy.ValidateAndSelectDropdownOption(
-      formControls.commandDropdown,
+    _.dataSources.ValidateNSelectDropdown(
+      "Commands",
       "Create a new file",
       "List files in bucket",
     );
@@ -191,11 +184,7 @@ describe("Validate CRUD queries for Amazon S3 along with UI flow verifications",
       expect(response.body.data.body[0].signedUrl).not.to.exist;
     });
 
-    cy.ValidateAndSelectDropdownOption(
-      formControls.s3ListSignedUrl,
-      "No",
-      "Yes",
-    );
+    _.dataSources.ValidateNSelectDropdown("Generate signed URL", "No", "Yes");
 
     cy.onlyQueryRun();
     cy.wait("@postExecute").then(({ response }) => {
@@ -217,11 +206,7 @@ describe("Validate CRUD queries for Amazon S3 along with UI flow verifications",
     // .eq(1)
     // .click({ force: true });
 
-    cy.ValidateAndSelectDropdownOption(
-      formControls.s3ListUnSignedUrl,
-      "Yes",
-      "No",
-    );
+    _.dataSources.ValidateNSelectDropdown("Generate unsigned URL", "Yes", "No");
     cy.onlyQueryRun();
     cy.wait("@postExecute").then(({ response }) => {
       expect(response.body.data.isExecutionSuccess).to.eq(true);
@@ -237,8 +222,8 @@ describe("Validate CRUD queries for Amazon S3 along with UI flow verifications",
 
     //cy.NavigateToActiveDSQueryPane(datasourceName);
     //cy.setQueryTimeout(30000);
-    cy.ValidateAndSelectDropdownOption(
-      formControls.commandDropdown,
+    _.dataSources.ValidateNSelectDropdown(
+      "Commands",
       "List files in bucket",
       "Read file",
     );
@@ -307,8 +292,8 @@ describe("Validate CRUD queries for Amazon S3 along with UI flow verifications",
       );
     });
 
-    cy.ValidateAndSelectDropdownOption(
-      formControls.s3ReadFileDataType,
+    _.dataSources.ValidateNSelectDropdown(
+      "Base64 encode file - yes/no",
       "Yes",
       "No",
     );
@@ -326,8 +311,8 @@ describe("Validate CRUD queries for Amazon S3 along with UI flow verifications",
     cy.NavigateToActiveDSQueryPane(datasourceName);
     //cy.renameWithInPane(queryName);
     cy.setQueryTimeout(30000);
-    cy.ValidateAndSelectDropdownOption(
-      formControls.commandDropdown,
+    _.dataSources.ValidateNSelectDropdown(
+      "Commands",
       "List files in bucket",
       "Delete file",
     );
@@ -372,8 +357,8 @@ describe("Validate CRUD queries for Amazon S3 along with UI flow verifications",
 
     //Validating List Files in bucket command after new file is deleted
     //cy.NavigateToActiveDSQueryPane(datasourceName);
-    cy.ValidateAndSelectDropdownOption(
-      formControls.commandDropdown,
+    _.dataSources.ValidateNSelectDropdown(
+      "Commands",
       "Delete file",
       "List files in bucket",
     );
@@ -390,8 +375,8 @@ describe("Validate CRUD queries for Amazon S3 along with UI flow verifications",
   it("6. Create new file in bucket for UI Operations & Verify Search, Delete operations from NewPage UI created in S3 ds & Bug 8686, 8684", function () {
     //Creating new file in bucket
     cy.NavigateToActiveDSQueryPane(datasourceName);
-    cy.ValidateAndSelectDropdownOption(
-      formControls.commandDropdown,
+    _.dataSources.ValidateNSelectDropdown(
+      "Commands",
       "List files in bucket",
       "Create a new file",
     );
@@ -400,11 +385,7 @@ describe("Validate CRUD queries for Amazon S3 along with UI flow verifications",
       formControls.s3BucketName,
     );
     cy.typeValueNValidate("CRUDNewPageFile", formControls.s3FilePath);
-    cy.ValidateAndSelectDropdownOption(
-      formControls.s3CreateFileDataType,
-      "Base64",
-      "Text",
-    );
+    _.dataSources.ValidateNSelectDropdown("File data type", "Base64", "Text");
     cy.typeValueNValidate(
       '{"data": "Hi, this is Automation script adding file for S3 CRUD New Page validation!"}',
       formControls.rawBody,
@@ -642,10 +623,7 @@ describe("Validate CRUD queries for Amazon S3 along with UI flow verifications",
     cy.NavigateToActiveDSQueryPane(datasourceName);
 
     _.agHelper.GetObjectName().then(($queryName) => {
-      cy.ValidateAndSelectDropdownOption(
-        formControls.commandDropdown,
-        "List files in bucket",
-      );
+      _.dataSources.ValidateNSelectDropdown("Commands", "List files in bucket");
       cy.typeValueNValidate(
         "assets-test.appsmith.com",
         formControls.s3BucketName,
@@ -679,16 +657,13 @@ describe("Validate CRUD queries for Amazon S3 along with UI flow verifications",
     cy.NavigateToActiveDSQueryPane(datasourceName);
     _.agHelper.GetObjectName().then(($queryName) => {
       _.entityExplorer.SelectEntityByName($queryName, "Queries/JS");
-      cy.ValidateAndSelectDropdownOption(
-        formControls.commandDropdown,
-        "List files in bucket",
-      );
+      _.dataSources.ValidateNSelectDropdown("Commands", "List files in bucket");
       cy.typeValueNValidate(
         "assets-test.appsmith.com",
         formControls.s3BucketName,
       );
       cy.runQuery();
-      cy.clickButton("Select Widget");
+      cy.clickButton("Select widget");
       cy.xpath(queryLocators.snipeableTable).click().wait(1500); //wait for table to load!
 
       cy.get(commonlocators.TableV2Row).validateWidgetExists();

@@ -12,7 +12,7 @@ on:
 
 jobs:
   ci-test-limited:
-    runs-on: ubuntu-latest-8-cores
+    runs-on: ubuntu-latest
     #timeout-minutes: 50
     if: |
       github.event.pull_request.head.repo.full_name == github.repository ||
@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        job: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+        job: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49]
 
     # Service containers to run with this job. Required for running tests
     services:
@@ -256,9 +256,15 @@ jobs:
           tag: ${{ github.event_name }}
           env: "NODE_ENV=development"
 
+      - name: Collect CI container logs
+        if: always()
+        working-directory: "."
+        run: |
+          docker logs appsmith 2>&1 > ~/dockerlogs.txt
+
       # Upload docker logs
       - name: Upload docker logs on failure
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: dockerlogs-${{ matrix.job }}

@@ -311,34 +311,23 @@ describe("Git sync apps", function () {
     cy.get(`.t--entity-name:contains(${newPage} Copy)`)
       .trigger("mouseover")
       .click({ force: true });
-    // move jsObject and postgres query to new page
-    cy.CheckAndUnfoldEntityItem("Queries/JS");
-    _.entityExplorer.ActionContextMenuByEntityName(
-      "get_users",
-      "Move to page",
-      "Child_Page",
-    );
+    cy.wait(2000); // adding wait for query to load
+    _.entityExplorer.SelectEntityByName("get_users", "Queries/JS");
+    _.agHelper.ActionContextMenuWithInPane("Move to page", "Child_Page");
     cy.runQuery();
     cy.wait(2000);
-    cy.get("body").then(($ele) => {
-      if ($ele.find(".t--close-editor").length) {
-        cy.get(".t--close-editor").click();
-      }
-    });
     cy.get(`.t--entity-name:contains(${newPage} Copy)`)
       .trigger("mouseover")
       .click({ force: true });
+    cy.wait(2000);
+    _.entityExplorer.SelectEntityByName("JSObject1", "Queries/JS");
     _.entityExplorer.ActionContextMenuByEntityName(
       "JSObject1",
       "Move to page",
       "Child_Page",
     );
     cy.wait(2000);
-    cy.get("body").then(($ele) => {
-      if ($ele.find(".t--close-editor").length) {
-        cy.get(".t--close-editor").click();
-      }
-    });
+    _.entityExplorer.NavigateToSwitcher("Widgets");
     cy.get(explorer.addWidget).click({ force: true });
     // bind input widgets to the jsObject and query response
     cy.dragAndDropToCanvas("inputwidgetv2", { x: 300, y: 300 });
@@ -369,6 +358,7 @@ describe("Git sync apps", function () {
     // verfiy data binding on all pages in deploy mode
     cy.wait(4000);
     cy.latestDeployPreview();
+    cy.wait(2000);
     cy.get(".bp3-input").should("be.visible");
     cy.get(".bp3-input")
       .first()
