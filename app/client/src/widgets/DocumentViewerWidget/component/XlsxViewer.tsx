@@ -77,7 +77,6 @@ const numberToExcelHeader = (index: number): string => {
 };
 
 interface DocumentViewerState {
-  jsonData: any[];
   sheetNames: string[];
   currentTableData: any[];
   currentTableHeaders: Column[];
@@ -86,44 +85,32 @@ interface DocumentViewerState {
 }
 
 export default function XlsxViewer(props: { blob?: Blob }) {
-  const defaultTableData: Record<number, []> = { "-1": [] };
   const [sheetIndex, setSheetIndex] = useState<number>(-1);
-  const [state, setState] = useState<DocumentViewerState>({
-    jsonData: [],
-    sheetNames: [],
-    currentTableData: [],
-    currentTableHeaders: [],
-    tableData: Object.assign({}, defaultTableData),
-    headerData: Object.assign({}, defaultTableData),
-  });
+  const [state, setState] = useState<DocumentViewerState>(newStateInstance());
 
   useEffect(() => {
     if (!props.blob) {
-      // Todo : figure out whot to do
       resetStates();
-      setState(Object.assign({}, state)); // state gets reset above
     } else {
       parseBlob(props.blob)
         .then((jsonData: { sheetsData: any; sheetNames: string[] }) => {
-          state.jsonData = jsonData.sheetsData;
-          state.sheetNames = jsonData.sheetNames;
-          const localSheetIndex = jsonData.sheetsData.length > 0 ? 0 : -1;
+          const newState = newStateInstance();
+          newState.sheetNames = jsonData.sheetNames;
+          const newSheetIndex = jsonData.sheetsData.length > 0 ? 0 : -1;
 
-          state.jsonData.forEach((data, index) => {
-            state.tableData[index] = parseTableBody(data);
-            state.headerData[index] = parseTableHeaders(data);
+          jsonData.sheetsData.forEach((data: any[], index: number) => {
+            newState.tableData[index] = parseTableBody(data);
+            newState.headerData[index] = parseTableHeaders(data);
           });
 
-          if (jsonData.sheetsData.length > 0) {
-            state.currentTableData = state.tableData[localSheetIndex];
-            state.currentTableHeaders = state.headerData[localSheetIndex];
-          }
-          setState(Object.assign({}, state));
-          setSheetIndex(localSheetIndex);
+          newState.currentTableData = newState.tableData[newSheetIndex];
+          newState.currentTableHeaders = newState.headerData[newSheetIndex];
+
+          setState(newState);
+          setSheetIndex(newSheetIndex);
         })
         .catch(() => {
           resetStates();
-          setState(Object.assign({}, state));
         });
     }
   }, [props.blob]);
@@ -152,13 +139,21 @@ export default function XlsxViewer(props: { blob?: Blob }) {
     return { sheetsData, sheetNames };
   };
 
+  function newStateInstance() {
+    const defaultTableData: Record<number, []> = { "-1": [] };
+    const newState: DocumentViewerState = {
+      sheetNames: [],
+      currentTableData: [],
+      currentTableHeaders: [],
+      tableData: { ...defaultTableData },
+      headerData: { ...defaultTableData },
+    };
+    return newState;
+  }
+
   const resetStates = () => {
-    state.jsonData = [];
-    state.currentTableData = [];
-    state.currentTableHeaders = [];
-    state.sheetNames = [];
-    state.tableData = Object.assign({}, defaultTableData);
-    state.headerData = Object.assign({}, defaultTableData);
+    const newState = newStateInstance();
+    setState(newState);
     setSheetIndex(-1);
   };
 
@@ -212,10 +207,7 @@ export default function XlsxViewer(props: { blob?: Blob }) {
           <button
             key={index}
             onClick={() => {
-              // state.sheetIndex = index
-              console.log("***", "clicking on index ", index);
               setSheetIndex(index);
-              // setState(Object.assign({}, state))
             }}
           >
             {name}
