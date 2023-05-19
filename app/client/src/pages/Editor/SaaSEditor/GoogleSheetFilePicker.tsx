@@ -50,7 +50,6 @@ function GoogleSheetFilePicker({
         document.querySelector(".picker-dialog-bg");
       if (!!element) {
         element.style.opacity = "1";
-        element.style.pointerEvents = "auto";
       }
     }
   }, [pickerVisible]);

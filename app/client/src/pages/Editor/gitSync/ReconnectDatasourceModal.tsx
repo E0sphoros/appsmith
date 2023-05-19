@@ -378,14 +378,23 @@ function ReconnectDatasourceModal() {
     }
   }, [isModalOpen, isDatasourceTesting, isDatasourceUpdating]);
 
-  const handleClose = useCallback(() => {
-    localStorage.setItem("importedAppPendingInfo", "null");
-    dispatch(setIsReconnectingDatasourcesModalOpen({ isOpen: false }));
-    dispatch(setWorkspaceIdForImport(""));
-    dispatch(setPageIdForImport(""));
-    dispatch(resetDatasourceConfigForImportFetchedFlag());
-    setSelectedDatasourceId("");
-  }, [dispatch, setIsReconnectingDatasourcesModalOpen, isModalOpen]);
+  const handleClose = useCallback(
+    (open: boolean) => {
+      const element: HTMLElement | null =
+        document.querySelector(".picker-dialog-bg");
+      if (!!element && !open) {
+        return;
+      }
+
+      localStorage.setItem("importedAppPendingInfo", "null");
+      dispatch(setIsReconnectingDatasourcesModalOpen({ isOpen: false }));
+      dispatch(setWorkspaceIdForImport(""));
+      dispatch(setPageIdForImport(""));
+      dispatch(resetDatasourceConfigForImportFetchedFlag());
+      setSelectedDatasourceId("");
+    },
+    [dispatch, setIsReconnectingDatasourcesModalOpen, isModalOpen],
+  );
 
   const onSelectDatasource = useCallback((ds: Datasource) => {
     setIsTesting(false);
